@@ -8,7 +8,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Question {
     @Id
     private String id;
-
+    private String question;
+    private String answer;
+    private String remark;
     public String getId() {
         return id;
     }
@@ -41,8 +43,6 @@ public class Question {
         this.remark = remark;
     }
 
-    private String question;
-    private String answer;
-    private String remark;
+
 
 }
