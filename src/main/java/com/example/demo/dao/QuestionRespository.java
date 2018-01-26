@@ -3,6 +3,7 @@ package com.example.demo.dao;
 import com.example.demo.model.Question;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +18,7 @@ public interface QuestionRespository extends MongoRepository<Question,String>{
      * @param question
      * @return
      */
-    List<Question> findByQuestionLike(String question);
+    List<Question> findByQuestionLike(String question,Sort srot);
 
     /**
      * 根据question模糊查询、分页

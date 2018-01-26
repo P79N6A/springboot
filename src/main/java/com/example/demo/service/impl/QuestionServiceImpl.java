@@ -1,25 +1,41 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dao.NoticeRespository;
 import com.example.demo.dao.QuestionRespository;
+import com.example.demo.model.Notice;
 import com.example.demo.model.Question;
 import com.example.demo.service.QuestionService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private QuestionRespository questionRespository;
+    @Autowired
+    private NoticeRespository noticeRespository;
 
     @Override
     public boolean addQuestion(Question question) {
         if (StringUtils.isNotBlank(question.getQuestion()) && StringUtils.isNotBlank(question.getAnswer())) {
-            questionRespository.save(question);
+            if(question.getType()==1){
+                Notice notice=new Notice();
+                notice.setTitle(question.getQuestion());
+                notice.setContent(question.getAnswer());
+                notice.setGmt_create(formatTime());
+                noticeRespository.save(notice);
+            }else{
+                question.setGmt_create(formatTime());
+                questionRespository.save(question);
+            }
 
             return true;
         }
@@ -49,9 +65,9 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public List<Question> queryByQuestion(String question) {
         if (StringUtils.isNotBlank(question)) {
-            return questionRespository.findByQuestionLike(question);
+            return questionRespository.findByQuestionLike(question,new Sort(new Sort.Order(Sort.Direction.DESC, "id")));
         }
-        return questionRespository.findAll();
+        return questionRespository.findAll(new Sort(new Sort.Order(Sort.Direction.DESC, "id")) );
     }
 
     @Override
@@ -63,5 +79,8 @@ public class QuestionServiceImpl implements QuestionService {
         return false;
     }
 
+    private String formatTime(){
+       return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+    }
 
 }
