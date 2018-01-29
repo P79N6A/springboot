@@ -37,10 +37,32 @@ public class ConfigConstants {
     public static final String RETURN_URL                     = "return_url";
     /**date format**/
     public static final String DATE_TIME_FORMAT               = "yyyy-MM-dd HH:mm:ss";
+    /**method**/
+    public static final String METHOD                         = "method";
+    /**request path**/
+    public static final String REQUEST_PATH                   = "com.alipay.api.request.";
+    /**response path**/
+    public static final String RESPONSE_PATH                  = "com.alipay.api.response.";
+    /**model path**/
+    public static final String MODEL_PATH                     = "com.alipay.api.domain.";
+    /**model**/
+    public static final String MODEL                          = "Model";
+    /**req**/
+    public static final String REQUEST                        = "Request";
+    /**resp**/
+    public static final String RESPONSE                       = "Response";
+    public static final int POST_TYPE = 1;
+    public static final int GET_TYPE = 2;
+    public static final int SDK_TYPE = 3;
+    public static final int DEFAULT_TYPE = 4;
+    /**用户授权令牌**/
     public String auth_token;
+    /**应用授权令牌**/
     public String app_auth_token;
+    /**同步地址*/
     public String return_url;
-
+    /**异步地址*/
+    public String notify_url;
     public static String getGateWay() {
         return GATE_WAY;
     }
@@ -77,7 +99,6 @@ public class ConfigConstants {
         this.notify_url = notify_url;
     }
 
-    public String notify_url;
 
     public static String outBiz() {
         String result = new Random().nextInt(100) + "";

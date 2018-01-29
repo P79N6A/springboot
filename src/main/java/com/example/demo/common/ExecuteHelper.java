@@ -1,8 +1,16 @@
 
 package com.example.demo.common;
 
+import com.alibaba.fastjson.JSON;
 import com.alipay.api.*;
 import org.apache.commons.lang.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -11,19 +19,66 @@ import org.apache.commons.lang.StringUtils;
 
 public class ExecuteHelper {
 
- private static AlipayClient alipayClient = new DefaultAlipayClient(ConfigConstants.GATE_WAY,ConfigConstants.APP_ID,
-         ConfigConstants.RSA_PRIVATE_KEY,ConfigConstants.FORMAT_JSON,ConfigConstants.CHARSET_GBK, ConfigConstants.ALI_PUBLIC_KEY);
-
-
-
-  /*  public ResultBean _ask(AlipayRequest alipayRequest,AlipayResponse alipayResponse,AlipayObject alipayObject,String jsonObject,ConfigConstants cs,Integer type) {
-        String body;
-        ResultBean resultBean = null;
-        if(StringUtils.isEmpty(jsonObject)&&alipayObject!=null){
-            alipayRequest.setBizModel(jsonObject.);
-        }else{
-
+    /***
+     * 构造请求参数，映射对应实体类，拆分授权、应用信息
+     * @param request
+     * @return resp
+     */
+    public static ApiResult buildRequest(HttpServletRequest request) {
+        ApiResult api;
+        Map map = new HashMap();
+        Enumeration pNames = request.getParameterNames();
+        while (pNames.hasMoreElements()) {
+            String name = (String) pNames.nextElement();
+            String value = request.getParameter(name);
+            map.put(name, value);
         }
+        ConfigConstants configConstants = new ConfigConstants();
+        configConstants.setAuth_token(StringUtils.isEmpty(request.getParameter(ConfigConstants.ACCESS_TOKEN)) ? null : request.getParameter(ConfigConstants.ACCESS_TOKEN));
+        configConstants.setApp_auth_token(StringUtils.isEmpty(request.getParameter(ConfigConstants.APP_AUTH_TOKEN)) ? null : request.getParameter(ConfigConstants.APP_AUTH_TOKEN));
+        configConstants.setReturn_url(StringUtils.isEmpty(request.getParameter(ConfigConstants.RETURN_URL)) ? null :request.getParameter(ConfigConstants.RETURN_URL));
+        configConstants.setNotify_url(StringUtils.isEmpty(request.getParameter(ConfigConstants.NOTIFY_URL)) ? null : request.getParameter(ConfigConstants.NOTIFY_URL));
+        String method = map.get(ConfigConstants.METHOD).toString();
+        StringBuffer requestPath = new StringBuffer(ConfigConstants.REQUEST_PATH);
+        requestPath.append(method);
+        Class<?> requestClass;
+        StringBuffer modelPath = new StringBuffer(ConfigConstants.MODEL_PATH);
+        modelPath.append(method.replace(ConfigConstants.REQUEST, ConfigConstants.MODEL));
+        Class<?> modelClass;
+        StringBuffer responsePath = new StringBuffer(ConfigConstants.RESPONSE_PATH);
+        responsePath.append(method.replace(ConfigConstants.REQUEST, ConfigConstants.RESPONSE));
+        Class<?> responseClass;
+        AlipayRequest alipayRequest;
+        AlipayObject alipayObject;
+        AlipayResponse alipayResponse;
+        try {
+            requestClass = Class.forName(requestPath.toString());
+            alipayRequest = (AlipayRequest) requestClass.newInstance();
+            modelClass = Class.forName(modelPath.toString());
+            alipayObject = (AlipayObject) JSON.parseObject(JSON.toJSONString(map), modelClass);
+            responseClass = Class.forName(responsePath.toString());
+            alipayResponse = (AlipayResponse) responseClass.newInstance();
+            api = exec(alipayRequest, alipayResponse, alipayObject, configConstants, method, askType(method));
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            api = ApiResult.isBuildError(method, request, e);
+        }
+        return api;
+    }
+
+    /***
+     * 调用sdk执行分发请求
+     * @param alipayRequest 请求
+     * @param _alipayResponse 响应
+     * @param alipayObject  入参
+     * @param cs 授权信息
+     * @param method 请求接口类
+     * @param type 请求类型
+     * @return 执行结果
+     */
+    public static ApiResult exec(AlipayRequest alipayRequest, AlipayResponse _alipayResponse, AlipayObject alipayObject, ConfigConstants cs, String method, Integer type) {
+        ApiResult apiResult = null;
+        alipayRequest.setBizModel(alipayObject);
+        //AlipayResponse alipayResponse=_alipayResponse;
         if (StringUtils.isNotBlank(cs.getReturn_url())) {
             alipayRequest.setReturnUrl(cs.getReturn_url());
         }
@@ -32,53 +87,55 @@ public class ExecuteHelper {
         }
         try {
             switch (type) {
-                case POST_TYPE:
-                    body = alipayClient.pageExecute(alipayRequest).getBody();
-                    resultBean = ResultBean.isSuccess(body);
+                case ConfigConstants.POST_TYPE:
+                    _alipayResponse = alipayClient.pageExecute(alipayRequest);
+                    apiResult = ApiResult.isSuccess(method, alipayRequest, _alipayResponse);
                     break;
-                case GET_TYPE:
-                    body = alipayClient.pageExecute(alipayRequest, "GET").getBody();
-                    resultBean = ResultBean.isSuccess(body);
+                case ConfigConstants.GET_TYPE:
+                    _alipayResponse = alipayClient.pageExecute(alipayRequest, "GET");
+                    apiResult = ApiResult.isSuccess(method, alipayRequest, _alipayResponse);
                     break;
-                case SDK_TYPE:
-                    body = alipayClient.sdkExecute(alipayRequest).getBody();
-                    resultBean = ResultBean.isSuccess(body);
+                case ConfigConstants.SDK_TYPE:
+                    _alipayResponse = alipayClient.sdkExecute(alipayRequest);
+                    apiResult = ApiResult.isSuccess(method, alipayRequest, _alipayResponse);
                     break;
-                case DEFAULT_TYPE:
-                    AlipayResponse response = null;
-                    //判定是否进行了对应的授权
-                    if (StringUtils.isNotBlank(alipayConfig.getApp_auth_token())) {
-                        response = alipayClient.execute(alipayRequest, null, alipayConfig.getApp_auth_token());
+                case ConfigConstants.DEFAULT_TYPE:
+                    _alipayResponse = alipayClient.execute(alipayRequest, StringUtils.isEmpty(cs.getAuth_token()) ? null : cs.getAuth_token(), StringUtils.isEmpty(cs.getApp_auth_token()) ? null : cs.getApp_auth_token());
+                    //_alipayResponse.getBody().replace("&", "&amp;");
+                    if (_alipayResponse.isSuccess()) {
+                        apiResult = ApiResult.isSuccess(method, alipayRequest, _alipayResponse);
                     } else {
-                        response = alipayClient.execute(alipayRequest);
+                        apiResult = ApiResult.isFailure(method, alipayRequest, _alipayResponse);
                     }
-                    if (response.isSuccess()) {
-                        resultBean = ResultBean.isSuccess(response, alipayClient.pageExecute(alipayRequest, "GET").getBody().replace("&", "&amp;"));
-                    } else {
-                        resultBean = ResultBean.isSuccess(response);
-                    }
-                    //不设置为字符串 设置对象
-                    //if (alipayClient.execute(alipayRequest).isSuccess())
-
-                    //else {
-                    //    body = response.getBody();
-                    //    resultBean = ResultBean.isFailure(body);
-                    //}
                     break;
             }
 
         } catch (AlipayApiException e) {
-
-         StringWriter sw = new StringWriter();
+            StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-            body = sw.toString();
-            resultBean = ResultBean.isThrowsExcetption(body);
-
+            apiResult = ApiResult.isExecError(method, alipayRequest, sw.toString());
 
         }
-        return resultBean;
-    }*/
+        return apiResult;
+    }
 
+    /**
+     *除PC、H5、APP外接口全部调用exec执行请求
+     * @param method 接口实体类
+     * @return 类型
+     */
+    private static int askType(String method) {
+        if ("AlipayTradePagePayRequest".equals(method) || "AlipayTradeWapPayRequest".equals(method)) {
+            return ConfigConstants.GET_TYPE;
+        } else if ("AlipayTradeAppPayRequest".equals(method)) {
+            return ConfigConstants.SDK_TYPE;
+        } else {
+            return ConfigConstants.DEFAULT_TYPE;
+        }
+    }
+
+    private static AlipayClient alipayClient = new DefaultAlipayClient(ConfigConstants.GATE_WAY, ConfigConstants.APP_ID,
+            ConfigConstants.RSA_PRIVATE_KEY, ConfigConstants.FORMAT_JSON, ConfigConstants.CHARSET_GBK, ConfigConstants.ALI_PUBLIC_KEY);
 
 }
