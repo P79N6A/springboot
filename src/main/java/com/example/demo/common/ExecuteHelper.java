@@ -21,6 +21,7 @@ public class ExecuteHelper {
 
     /***
      * 构造请求参数，映射对应实体类，拆分授权、应用信息
+     * 表单执行所有支付宝接口(非标准除外)，method对应接口名称:必须
      * @param request
      * @return resp
      */
@@ -66,6 +67,7 @@ public class ExecuteHelper {
     }
 
     /***
+     * 后端请求支付宝标准接口
      * 调用sdk执行分发请求
      * @param alipayRequest 请求
      * @param _alipayResponse 响应
