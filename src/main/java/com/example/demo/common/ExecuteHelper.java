@@ -37,9 +37,9 @@ public class ExecuteHelper {
         ConfigConstants configConstants = new ConfigConstants();
         configConstants.setAuth_token(StringUtils.isEmpty(request.getParameter(ConfigConstants.ACCESS_TOKEN)) ? null : request.getParameter(ConfigConstants.ACCESS_TOKEN));
         configConstants.setApp_auth_token(StringUtils.isEmpty(request.getParameter(ConfigConstants.APP_AUTH_TOKEN)) ? null : request.getParameter(ConfigConstants.APP_AUTH_TOKEN));
-        configConstants.setReturn_url(StringUtils.isEmpty(request.getParameter(ConfigConstants.RETURN_URL)) ? null :request.getParameter(ConfigConstants.RETURN_URL));
+        configConstants.setReturn_url(StringUtils.isEmpty(request.getParameter(ConfigConstants.RETURN_URL)) ? null : request.getParameter(ConfigConstants.RETURN_URL));
         configConstants.setNotify_url(StringUtils.isEmpty(request.getParameter(ConfigConstants.NOTIFY_URL)) ? null : request.getParameter(ConfigConstants.NOTIFY_URL));
-        String method = map.get(ConfigConstants.METHOD).toString();
+        String method = request.getParameter(ConfigConstants.METHOD);
         StringBuffer requestPath = new StringBuffer(ConfigConstants.REQUEST_PATH);
         requestPath.append(method);
         Class<?> requestClass;
@@ -60,7 +60,7 @@ public class ExecuteHelper {
             responseClass = Class.forName(responsePath.toString());
             alipayResponse = (AlipayResponse) responseClass.newInstance();
             api = exec(alipayRequest, alipayResponse, alipayObject, configConstants, method, askType(method));
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+        } catch (Exception e) {
             api = ApiResult.isBuildError(method, request, e);
         }
         return api;
@@ -123,7 +123,8 @@ public class ExecuteHelper {
     }
 
     /**
-     *除PC、H5、APP外接口全部调用exec执行请求
+     * 除PC、H5、APP外接口全部调用exec执行请求
+     *
      * @param method 接口实体类
      * @return 类型
      */

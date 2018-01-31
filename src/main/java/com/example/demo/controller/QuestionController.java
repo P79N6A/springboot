@@ -12,10 +12,12 @@ import com.alipay.api.request.AlipayTradePrecreateRequest;
 import com.alipay.api.response.AlipayMarketingCardOpenResponse;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayTradePrecreateResponse;
+import com.example.demo.common.ConfigConstants;
 import com.example.demo.common.ExecuteHelper;
 import com.example.demo.common.ResultBean;
 import com.example.demo.model.Question;
 import com.example.demo.service.QuestionService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,12 +88,12 @@ public class QuestionController {
      */
     @GetMapping(value = "open")
     public ResultBean open(HttpServletRequest request, @RequestParam(value = "auth_code", required = false, defaultValue = "none") String auth_code, @RequestParam(value = "template_id", required = false, defaultValue = "none") String template_id, @RequestParam(value = "request_id", required = false, defaultValue = "none") String request_id) throws AlipayApiException {
-        Enumeration enu=request.getParameterNames();
-        StringBuffer aa=new StringBuffer("urldata=");
-        while(enu.hasMoreElements()){
-            String paraName=(String)enu.nextElement();
+        Enumeration enu = request.getParameterNames();
+        StringBuffer aa = new StringBuffer("urldata=");
+        while (enu.hasMoreElements()) {
+            String paraName = (String) enu.nextElement();
             //System.out.println(paraName+": "+request.getParameter(paraName));
-            aa.append(paraName+": "+request.getParameter(paraName));
+            aa.append(paraName + ": " + request.getParameter(paraName));
         }
         Question question = new Question();
         question.setQuestion(auth_code);
@@ -106,7 +108,7 @@ public class QuestionController {
         alipaySystemOauthTokenRequest.setCode(auth_code);
         alipaySystemOauthTokenRequest.setGrantType("authorization_code");
         AlipaySystemOauthTokenResponse alipaySystemOauthTokenResponse = alipayClient.execute(alipaySystemOauthTokenRequest);
-        if(alipaySystemOauthTokenResponse.isSuccess()){
+        if (alipaySystemOauthTokenResponse.isSuccess()) {
             AlipayMarketingCardOpenRequest alipayMarketingCardOpenRequest = new AlipayMarketingCardOpenRequest();
             AlipayMarketingCardOpenModel alipayMarketingCardOpenModel = new AlipayMarketingCardOpenModel();
             alipayMarketingCardOpenModel.setCardTemplateId(template_id);
@@ -142,8 +144,11 @@ public class QuestionController {
         return new ResultBean<>(questionService.delQuestion(id));
     }
 
-    @RequestMapping(value = "loadData")
+    @RequestMapping(value = "ask")
     public ResultBean loadData(HttpServletRequest request) throws Exception {
+        if (StringUtils.isBlank(request.getParameter(ConfigConstants.METHOD))) {
+            return new ResultBean().isFailure("request method is not null");
+        }
         return new ResultBean<>(ExecuteHelper.buildRequest(request));
     }
 
