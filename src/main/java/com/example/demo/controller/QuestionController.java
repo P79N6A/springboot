@@ -95,10 +95,10 @@ public class QuestionController {
             //System.out.println(paraName+": "+request.getParameter(paraName));
             aa.append(paraName + ": " + request.getParameter(paraName));
         }
-        Question question = new Question();
+       /* Question question = new Question();
         question.setQuestion(auth_code);
         question.setAnswer(request_id);
-        questionService.addQuestion(question);
+        questionService.addQuestion(question);*/
         String appid2 = "2016101902241073";
         String privatekey2 = "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBANSe1tYHjTEBfgfl8I2b8F/hlUeBNUaNnVseEEwTISZlYCwjNl0X48W54y5zaZRpbLWPVVH6WYvMYH0DGZuBUJUXfwV4KN2iMSMR+/PcGoQaEH+3h6fEi8g+8G2Y6oxkqLINdeqyCDsjO6aiGjZdZVQVy6OGy6xINZOKq5ecFaitAgMBAAECgYByLeJ9CY0e9ggyQZ8OzOEm/ENoJNDxVHdeSSTDVbqFngcpbLdzArNEqXCAr2XRV1QTpCdTYLfZxSVDvPhxc95LV0cmXQJQgGIH7cFFJUDp8vlwCWnkQAV+yqnevTY9jXwMMhZFUilEyAlwSqZ2aiFlimcwFDXD5l2hRfQdCSq9wQJBAPgkSO1fACqx3gdKDH386+JTzfpLYl+h/z/UYXTnSEC/3nO1kRlLuJw0qcXCTRRanWgWGvxbNieBRPhxIYTBJRUCQQDbWpQ+Qu/DVOdiPFXa+udQzsFmsLcWQSABrgLdoyR09XxP36Hh1d/msWKjLdhvO0boga5XN5e/QEouRiLWqos5AkEAtQib3/nQQFXV21GNvZj5avyjKLk4wvaIJ0RF+akG0J5qp9ZOTrssq2HMfofb/j6B2j9OXtAYuUeZTvwSbS0QZQJAFOwX1bR2wA/aHhGZMtDZvWhrJAtY+0Ns9RwO4+sKsCk2GTxAaZUHzS5ANUZLLZje05CC+4iu7awJJ07DRexwaQJAO+nQVYpwAXKGr+IYk+X3xBEh4pStipSJRMFvK2DyQB/oWl22sA9PsFRbO4+POXbTQzhmodhklOErgn7ekKkQGw==";
         String publickey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDI6d306Q8fIfCOaTXyiUeJHkrIvYISRcc73s3vF1ZT7XN8RNPwJxo8pWaJMmvyTn9N4HQ632qJBVHf8sxHi/fEsraprwCtzvzQETrNRwVxLO5jVmRGi60j8Ue1efIlzPXV9je9mkjzOmdssymZkh2QhUrCmZYI/FCEa3/cNMW0QIDAQAB";
@@ -121,7 +121,7 @@ public class QuestionController {
             merchantCard.setBalance("100");
             merchantCard.setPoint("100");
             merchantCard.setLevel("VIP2");
-            merchantCard.setExternalCardNo(alipaySystemOauthTokenResponse.getAlipayUserId());
+            merchantCard.setExternalCardNo(ConfigConstants.outBiz());
             merchantCard.setOpenDate(new Date());
             merchantCard.setValidDate("2025-01-01 23:59:59");
             alipayMarketingCardOpenModel.setCardExtInfo(merchantCard);
