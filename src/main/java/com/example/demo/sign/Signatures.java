@@ -28,17 +28,33 @@ public class Signatures {
         /**开放api：公共参数：实例化Signature，业务参数:自定义传入(json).【ps：自签名，不依赖支付宝sdk】**/
         Signatures signatures=new Signatures(UserConfig.APP_ID,UserConfig.RSA_PRIVATE_KEY);
         Map<String, String> bizParams = new ConcurrentHashMap<>();
-        bizParams .put("out_trade_no",bulidOutTradeNo());
-        bizParams.put("subject","test");
+        bizParams.put("out_trade_no",bulidOutTradeNo());
+        bizParams.put("subject","功能的快感测试");
        bizParams.put("total_amount","0.01");
         UserConfig userConfig=new UserConfig();
 //        userConfig.setCode("d139b3a81bc5449bb2e63be8af8bNA86");
 //        userConfig.setGrant_type("authorization_code");
         userConfig.setMethod("alipay.trade.precreate");
         userConfig.setBiz_content(JSON.toJSONString(bizParams));
+        //userConfig.setBiz_content("{\"request_id\":\"2018030315200000006\",\"card_type\":\"OUT_MEMBER_CARD\",\"biz_no_suffix_len\":\"10\",\"write_off_type\":\"barcode\",\"template_style_info\":{\"card_show_name\":\"度假客会员3\",\"logo_id\":\"_KxSz3iCRNuPkTa6rzrrsQAAACMAAQED\",\"background_id\":\"FSlnoc6VTbCgdhWycP_eQQAAACMAAQED\",\"bg_color\":\"rgb(22,112,179)\",\"front_text_list_enable\":false,\"front_image_enable\":false,\"feature_descriptions\":[\"使用度假客会员卡可享受会员折扣\"],\"slogan\":\"会员权益享不停\",\"brand_name\":\"度假客\"},\"template_benefit_info\":[{\"title\":\"消费即折扣\",\"benefit_desc\":[\"消费即折扣\"],\"start_date\":\"2018-03-01 00:00:00\",\"end_date\":\"2030-02-28 23:59:59\"}],\"column_info_list\":[{\"code\":\"BENEFIT_INFO\",\"operate_type\":\"openWeb\",\"title\":\"专享\",\"value\":\"80\",\"more_info\":{\"title\":\"会员专享权益\",\"url\":\"http://www.baidu.com\"}}],\"field_rule_list\":[{\"field_name\":\"Balance\",\"rule_name\":\"ASSIGN_FROM_REQUEST\",\"rule_value\":\"Balance\"}]}");
         System.out.println(signatures.buildParams(userConfig));
         //CountDownLatch cd=new CountDownLatch(1000);Executor ex= Executors.newFixedThreadPool(10);
+        MapEncrypt en=new MapEncrypt();
+        System.out.println(en.encrypt("hello*worlds"));
+        System.out.println(en.decrypt(en.encrypt("hello*worlds")));
+        System.out.println(en.getBase64("ILoveYou"));
+        System.out.println(en.getFromBase64(en.getBase64("ILoveYou")));
+        File file=new File("D:/tempAes/image.jpg");
+        FileInputStream in=new FileInputStream(file);
+        File file2=new File("D:/tempAes/aes.key");
+        FileOutputStream out=new FileOutputStream(file2);
+        en.generateKey();
+        System.out.println(JSON.toJSONString(en.getKey()));
+        en.encrypt(in,out);
+        en.decrypt(in,out);
+
     }
+
 
     /**
      * 构造请求参数 biz/json
