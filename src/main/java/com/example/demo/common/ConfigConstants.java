@@ -41,8 +41,8 @@ public class ConfigConstants {
     public static final String METHOD                         = "method";
     /**request path**/
     public static final String REQUEST_PATH                   = "com.alipay.api.request.";
-    /**response path**/
-    public static final String RESPONSE_PATH                  = "com.alipay.api.response.";
+    /**orgQueryResp path**/
+    public static final String RESPONSE_PATH                  = "com.alipay.api.orgQueryResp.";
     /**model path**/
     public static final String MODEL_PATH                     = "com.alipay.api.domain.";
     /**model**/

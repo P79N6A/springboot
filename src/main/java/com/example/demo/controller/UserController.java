@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.common.ResultBean;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping(value = "user")
+@Api(value = "user", description = "角色管理接口")
 public class UserController {
     @Autowired
     private UserService userService;
@@ -39,6 +41,7 @@ public class UserController {
     @RequestMapping(value = "find_by_id")
     public ResultBean<User> findById(@RequestParam(value = "id") String id) {
         return new ResultBean<>(userService.findById(id));
+       // com.dingtalk.chatbot.message.TextMessage
     }
 
     @RequestMapping(value = "findAll")

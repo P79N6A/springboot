@@ -5,6 +5,7 @@ import com.example.demo.model.User;
 import com.example.demo.service.UserService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -35,8 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAll() {
-        return userRespository.findAll();
-    }
+        return userRespository.findAll(new Sort(new Sort.Order(Sort.Direction.DESC,"id")));}
 
     @Override
     public User findById(String id) {

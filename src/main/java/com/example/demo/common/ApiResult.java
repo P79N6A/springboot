@@ -1,5 +1,6 @@
 package com.example.demo.common;
 
+import javax.management.Query;
 import java.io.Serializable;
 
 /**
@@ -11,6 +12,7 @@ public class ApiResult<T> implements Serializable {
     public static final int BADE = 201;
     public static final int EXE_ERROR = 500;
     public static final int BAD_ERROR = 300;
+    public static final int QUERY_ERROR= 203;
     public static final String SUCCESSFUL = "success";
     public static final String FAILURE = "failure";
     public static final String BULID_ERROR = "build params error";
@@ -41,6 +43,11 @@ public class ApiResult<T> implements Serializable {
         this.request = req;
         this.response = resp;
     }
+    public ApiResult(int status, String msg) {
+        this.status = status;
+        this.msg = msg;
+
+    }
 
     public static ApiResult isSuccess(String method, Object req, Object resp) {
         return new ApiResult(SUCCESS, method, SUCCESSFUL, req, resp);
@@ -57,5 +64,10 @@ public class ApiResult<T> implements Serializable {
     public static ApiResult isBuildError(String method, Object req, Object resp) {
         return new ApiResult(BAD_ERROR, method, BULID_ERROR, req, resp);
     }
+
+    public static ApiResult isQueryError(String message) {
+        return new ApiResult(QUERY_ERROR, message);
+    }
+
 
 }

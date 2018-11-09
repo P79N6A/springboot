@@ -17,6 +17,7 @@ import com.example.demo.common.ExecuteHelper;
 import com.example.demo.common.ResultBean;
 import com.example.demo.model.Question;
 import com.example.demo.service.QuestionService;
+import io.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ import java.util.*;
 @RestController
 @CrossOrigin
 @RequestMapping(value = "question")
+@Api(value = "question", description = "QA接口")
 public class QuestionController {
     @Autowired
     private QuestionService questionService;

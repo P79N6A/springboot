@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.common.ResultBean;
 import com.example.demo.model.Record;
 import com.example.demo.service.RecordService;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping(value = "record")
+@Api(value = "record", description = "记录生成接口")
 public class RecordController {
     @Autowired
     private RecordService recordService;

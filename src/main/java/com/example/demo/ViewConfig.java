@@ -9,11 +9,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @Configuration
 public class ViewConfig extends WebMvcConfigurerAdapter{
-   /* @Override
+   @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("").setViewName("index");
-        registry.addViewController("/").setViewName("index");
-        registry.addViewController("index").setViewName("index");
+        registry.addViewController("").setViewName("swagger-ui.html");
+        registry.addViewController("/").setViewName("swagger-ui.html");
+        registry.addViewController("index").setViewName("swagger-ui.html");
 
-    }*/
+    }
 }

@@ -23,7 +23,7 @@ public class Signatures {
         alipayObject.setSubject("pay test");null
         alipayObject.setTotalAmount("0.01");
         alipayObject.setOutTradeNo("2018022821001004740016474574");
-        System.out.println(ExecuteHelper.exec(new AlipayTradePrecreateRequest(),new AlipayTradePrecreateResponse(),alipayObject,new ConfigConstants(),null,4).response);*/
+        System.out.println(ExecuteHelper.exec(new AlipayTradePrecreateRequest(),new AlipayTradePrecreateResponse(),alipayObject,new ConfigConstants(),null,4).orgQueryResp);*/
 
         /**开放api：公共参数：实例化Signature，业务参数:自定义传入(json).【ps：自签名，不依赖支付宝sdk】**/
         Signatures signatures=new Signatures(UserConfig.APP_ID,UserConfig.RSA_PRIVATE_KEY);
