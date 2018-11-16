@@ -1,6 +1,9 @@
 package com.example.demo.Scheduling;
 
+import com.alibaba.fastjson.JSON;
+import com.example.demo.model.Account;
 import com.example.demo.model.WorkDuty;
+import com.example.demo.service.AccountService;
 import com.example.demo.service.WorkDutyService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -18,17 +21,20 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @Configuration
 @EnableScheduling
 public class SchedulingConfig {
     public static String WEBHOOK_TOKEN = "https://oapi.dingtalk.com/robot/send?access_token=be565b17b6fd1d5d61b2ab5c0719a534fc2dd22069d60c99a72698ad7122b952";
-    public static String WEBHOOK_TOKEN_TEST = "https://oapi.dingtalk.com/robot/send?access_token=67eba905e3aef25a3ace347952063cb739ddb5654c050d26166cead10ccda2bd";
+    public static String WEBHOOK_TOKEN_TEST = "https://oapi.dingtalk.com/robot/send?access_token=e292dbf9b07bd91be1820a9c33aae8cae33f542762777d216d5a9ed254ccd513";
     public static String WEBHOOK_TOKEN_STOCK = "https://oapi.dingtalk.com/robot/send?access_token=a386c700f4b9bb55509326bee24692410f94f4b74f6e6472c56e1e0310d1a14d";
 //    @Autowired
 //    private PurchasePlanRequestService purchasePlanRequestService;
     @Autowired
     private WorkDutyService workDutyService;
+    @Autowired
+    private AccountService accountService;
 //
 //    @Scheduled(cron = "0 0/60 9-17 * * ?") // 工作日9-17每小时
 //    public void query() throws Exception{
@@ -104,7 +110,7 @@ public class SchedulingConfig {
             String msg="{\n" +
                     "     \"msgtype\": \"markdown\",\n" +
                     "     \"markdown\": {\"title\":\"值班提醒\",\n" +
-                    "\"text\":\"#### 温馨提示  \\n > 您好，@"+workDuty.getPhone()+","+date+"号,今天由你值班呢，记得本周是你的值班周\\n\\n到岗时间：8.30分\\n\\n  > 时间段："+workDuty.getWorkLot()+" \"\n"+
+                    "\"text\":\"#### 温馨提示  \\n > 您好，@"+workDuty.getPhone()+","+date+"号,今天由你值班呢，记得本周是你的值班周\\n\\n  > 到岗时间：8.30分\\n\\n  > 时间段："+workDuty.getWorkLot()+" \"\n"+
                     "     },\n" +
                     "    \"at\": {\n" +
                     "        \"atMobiles\": [\n" +
@@ -132,6 +138,28 @@ public class SchedulingConfig {
             httpPost(WEBHOOK_TOKEN_STOCK,textMsg);
         }
 
+    }
+
+    @Scheduled(cron = "0 30 16 ? * MON-FRI")
+    public void meetingChatBotWithDay() throws Exception{
+        String msg;
+        String userId;
+        List<Account> accounts=accountService.getMeetingSequence(1,0);
+        if(accounts.size()!=0){
+            userId=accounts.get(0).getId();
+            msg=buildMsg(accounts.get(0));
+        }else{
+            List<Account> accountList=accountService.showMeetingList();
+            for (int i = 0; i <accountList.size() ; i++) {
+                accountService.updateSequence(accountList.get(i).getId(),0);
+            }
+            List<Account> newSequence=accountService.getMeetingSequence(1,0);
+            userId=newSequence.get(0).getId();
+            msg=buildMsg(newSequence.get(0));
+
+        }
+        httpPost(WEBHOOK_TOKEN,msg);
+        accountService.updateSequence(userId,1);
 
     }
 
@@ -146,5 +174,21 @@ public class SchedulingConfig {
             String result= EntityUtils.toString(response.getEntity(), "utf-8");
             System.out.println(result);
         }
+    }
+
+    private static String buildMsg(Account account){
+        String message="{\n" +
+                "     \"msgtype\": \"markdown\",\n" +
+                "     \"markdown\": {\"title\":\"会议邀请\",\n" +
+                "\"text\":\"#### 会议提醒  \\n > @"+account.getPhone()+" Hi,"+account.getNick_name()+",来自客满的会议邀请，请准时赴邀\\n\\n  > 时间：今日下午五点\\n\\n  > 地点：4楼致远厅\"\n" +
+                "     },\n" +
+                "    \"at\": {\n" +
+                "        \"atMobiles\": [\n" +
+                "            \""+account.getPhone()+"\"\n" +
+                "        ], \n" +
+                "        \"isAtAll\": false\n" +
+                "    }\n" +
+                " }";
+        return  message;
     }
 }

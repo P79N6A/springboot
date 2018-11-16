@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.Inet4Address;
 import java.util.List;
 
 @RestController
@@ -64,4 +65,16 @@ public class AccountController {
     public  ResultBean<Boolean> update(Account account) {
         return new ResultBean<>(accountService.updateAccount(account));
     }
+    @ApiOperation(value = "会议通知更新",notes="更新用户信息")
+    @PostMapping(value = "updateSequence")
+    public  ResultBean<Boolean> updateSequence(@RequestParam(value = "id") String id,@RequestParam(value = "review")Integer review) {
+        return new ResultBean<>(accountService.updateSequence(id,review));
+    }
+
+    @ApiOperation(value = "会议通知列表",notes="会议通知列表")
+    @GetMapping(value = "showMeetingList")
+    public  ResultBean<List<Account>> showMeetingList() {
+        return new ResultBean<>(accountService.showMeetingList());
+    }
+
 }

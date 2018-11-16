@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.example.demo.common.zcy.*;
 import com.example.demo.model.car.InstitutionImportParams;
 import com.example.demo.model.car.InstitutionQueryParams;
-import com.example.demo.model.car.orgDelResp.OrgDelResp;
-import com.example.demo.model.car.orgImportResp.OrgImportResp;
-import com.example.demo.model.car.orgQueryResp.InstitutionRespModel;
+import com.example.demo.model.car.VehicleImportParams;
+import com.example.demo.model.car.delResp.OrgDelResponse;
+import com.example.demo.model.car.delResp.VehicleDelResponse;
+import com.example.demo.model.car.importResp.ImportResponse;
+import com.example.demo.model.car.orgQueryResp.InstitutionResponse;
+import com.example.demo.model.car.vehicleQueryResp.VehicleQueryResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -16,14 +18,13 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
-import springfox.documentation.spring.web.json.Json;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 @Slf4j
@@ -61,8 +62,17 @@ public class RequestUtil {
 
     public static void main(String[] args){
        //orgnQuery();
-       importOrg();
+       //importOrg();
        //delOrg();
+       // vehicleQuery();
+        //vehicleRemove();
+        //vehicleImport();
+//        Long timestamp = Long.parseLong("-2035785600000");
+//        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(timestamp));
+//        System.out.println(date);
+//        System.out.println(secondToDate("-2035785600000","yyyy-MM-dd"));
+        System.out.println(pointToMilions("600000"));
+
     }
 
     private static void delOrg(){
@@ -75,11 +85,11 @@ public class RequestUtil {
         // {"success":false,"code":"org.id.not.exist","message":"org.id.not.exist","result":null}
         //{"success":true,"code":null,"message":null,"result":true}
         if(isSuccess(result)){
-            OrgDelResp orgDelResp=JSON.parseObject(getPosition(result),OrgDelResp.class);
-            if(orgDelResp.isSuccess()&&orgDelResp.isResult()){
+            OrgDelResponse orgDelResponse =JSON.parseObject(getPosition(result),OrgDelResponse.class);
+            if(orgDelResponse.isSuccess()&& orgDelResponse.isResult()){
                 System.out.println("del success");
             }else{
-                System.out.println(orgDelResp.getCode()+orgDelResp.getMessage());
+                System.out.println(orgDelResponse.getCode()+ orgDelResponse.getMessage());
             }
         }else{
             System.out.println("exception");
@@ -113,15 +123,15 @@ public class RequestUtil {
         //{"success":true,"code":null,"message":null,"result":{"total":2,"skipped":2,"succeed":0,"failed":2,"fails":[{"line":"2","name":"","error":"org.import.info.car.info.isInDB"},{"line":"3","name":"","error":"org.import.info.car.info.isInDB"}],"succeeds":[],"isRunning":false,"quotaCreateUpdateNum":null,"inQuotaLine":null,"backup":null}}
         //{"success":true,"code":null,"message":null,"result":{"total":2,"skipped":0,"succeed":1,"failed":1,"fails":[{"line":"3","name":"0025354200","error":"org.import.org.code.duplicate"}],"succeeds":[{"line":"2"}],"isRunning":false,"quotaCreateUpdateNum":null,"inQuotaLine":null,"backup":null}}
         if(isSuccess(result)){
-            OrgImportResp orgImportResp=JSON.parseObject(getPosition(result),OrgImportResp.class);
-            if(orgImportResp.isSuccess()){
+            ImportResponse ImportResponse =JSON.parseObject(getPosition(result),ImportResponse.class);
+            if(ImportResponse.isSuccess()){
 
-                System.out.println("共"+orgImportResp.getResult().getTotal()+"条，成功："+orgImportResp.getResult().getSucceed()+"条，失败："+orgImportResp.getResult().getFailed()+"条");
+                System.out.println("共"+ ImportResponse.getResult().getTotal()+"条，成功："+ ImportResponse.getResult().getSucceed()+"条，失败："+ ImportResponse.getResult().getFailed()+"条");
 
             }else{
                 System.out.println("导入机构参数为空");
             }
-            System.out.println(JSON.toJSONString(orgImportResp));
+            System.out.println(JSON.toJSONString(ImportResponse));
         }else {
             System.out.println("exception");
         }
@@ -132,17 +142,14 @@ public class RequestUtil {
         //institutionQueryParams.setOrgCode("12330000663920297D");
         institutionQueryParams.setOrgName("平阳县南雁镇人民政府");
         institutionQueryParams.setOrgRealName("平阳县南雁镇人民政府");
-
-
 //        JSONObject jsonObject = new JSONObject();
 //        jsonObject.put("districtCode","339900");
 //        jsonObject.put("orgName","浙江体育职业技术学院");
 //        jsonObject.put("orgRealName","浙江体育职业技术学院");
 //        jsonObject.put("orgCode","12330000663920297D");
-        //System.out.println(JSON.toJSON(institutionQueryParams));
         String result=execRequest(JSON.toJSON(institutionQueryParams).toString(),url);
         if(isSuccess(result)){
-            InstitutionRespModel model=JSON.parseObject(getPosition(result),InstitutionRespModel.class);
+            InstitutionResponse model=JSON.parseObject(getPosition(result),InstitutionResponse.class);
             if(model.isSuccess()){
                 if(model.getResult().isEmpty()||model.getResult().getTotal()==0){
                     System.out.println("查询无结果");
@@ -154,6 +161,111 @@ public class RequestUtil {
                 System.out.println("查询失败");
             }
         }else {
+            System.out.println("exception");
+        }
+
+    }
+
+    private static void vehicleQuery(){
+        String url="/fiscal/zcy.car.vehicle.list";
+        String plantNO="浙AKF056";
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("plateNo",plantNO);
+        jsonObject.put("labelType",1);
+        String result=execRequest(jsonObject.toString(),url);
+        if(isSuccess(result)){
+            VehicleQueryResponse vehicleQueryResponse =JSON.parseObject(getPosition(result),VehicleQueryResponse.class);
+            if(vehicleQueryResponse.isSuccess()){
+                System.out.println(JSON.toJSONString(vehicleQueryResponse));
+            }else{
+                System.out.println(JSON.toJSONString(vehicleQueryResponse));
+            }
+        }else{
+            System.out.println("exception");
+        }
+
+
+    }
+    private static void vehicleImport(){
+        String uri="/fiscal/zcy.car.vehicle.init.import";
+        List<VehicleImportParams> vehicles=new ArrayList<>();
+        VehicleImportParams vehicleImportParams=new VehicleImportParams();
+        vehicleImportParams.setLineNum("1");
+        vehicleImportParams.setOrgCode("12332529472550131L");
+        vehicleImportParams.setOrgName("景宁畲族自治县港航管理所");
+        vehicleImportParams.setPlateNo("浙KC1012");
+        vehicleImportParams.setCarClassName("轿车");
+        vehicleImportParams.setCarUsageName("执法执勤用车");
+        vehicleImportParams.setPrice("17.30");
+        vehicleImportParams.setRegisterDate("2003-7-1");
+        vehicleImportParams.setBrandName("猎豹");
+        vehicleImportParams.setVolumeOut("2");
+        vehicleImportParams.setVinNo("LL6652B063A010143");
+        vehicleImportParams.setEngineNo("6224");
+        vehicleImportParams.setIsImport("国产");
+
+        VehicleImportParams vehicleImportParams2=new VehicleImportParams();
+        vehicleImportParams2.setLineNum("2");
+        vehicleImportParams2.setOrgCode("12332529472550131LA");
+        vehicleImportParams2.setOrgName("景宁畲族自治县港航管理所");
+        vehicleImportParams2.setPlateNo("浙KC1012");
+        vehicleImportParams2.setCarClassName("轿车");
+        vehicleImportParams2.setCarUsageName("执法执勤用车");
+        vehicleImportParams2.setPrice("17.30");
+        vehicleImportParams2.setRegisterDate("2003-7-1");
+        vehicleImportParams2.setBrandName("猎豹");
+        vehicleImportParams2.setVolumeOut("2");
+        vehicleImportParams2.setVinNo("LL6652B063A010143A");
+        vehicleImportParams2.setEngineNo("6224A");
+        vehicleImportParams2.setIsImport("国产");
+        vehicles.add(vehicleImportParams);
+        vehicles.add(vehicleImportParams2);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("importInfo",vehicles);
+        String result=execRequest(jsonObject.toString(),uri);
+        // 单条车辆信息导入时， code错误 {"success":false,"code":"org.import.info.org.code.invalid","message":"org.import.info.org.code.invalid","result":null}
+        // 多条车辆信息导入时 org.car.code.name.not.match
+        // name {"success":true,"code":null,"message":null,"result":{"total":1,"skipped":0,"succeed":0,"failed":1,"fails":[{"line":"2","name":"景宁畲族自治县港航管理所A","error":"org.import.import.org.name.not.same.with.system.org.name"}],"succeeds":[],"isRunning":false,"quotaCreateUpdateNum":null,"inQuotaLine":null,"backup":null}}
+        // 车辆类型 {"success":true,"code":null,"message":null,"result":{"total":1,"skipped":0,"succeed":0,"failed":1,"fails":[{"line":"2","name":"","error":"org.import.car.class.name.not.exist"}],
+        // 性质 org.import.car.usage.name.not.exist
+        // 价格 org.import.car.price.invalid
+        // 品牌 org.import.car.import.brand.not.exists
+        // 排量 org.import.car.volume.out.invalid
+        // 车架号重复 org.import.car.vin.no.duplicate
+        // 发动机 org.import.car.engine.no.duplicate
+        // 进口 org.import.car.is.import.invalid
+        // 车牌号 org.import.car.plate.no.duplicate
+        // 日期格式错误 {"success":true,"code":null,"message":null,"result":{"total":1,"skipped":0,"succeed":0,"failed":1,"fails":[{"line":"2","name":"2003/7/1","error":"org.import.car.register.date.invalid"}],"succeeds":[],"isRunning":false,"quotaCreateUpdateNum":null,"inQuotaLine":null,"backup":null}}
+        // success {"success":true,"code":null,"message":null,"result":{"total":1,"skipped":0,"succeed":1,"failed":0,"fails":[],"succeeds":[{"line":"2"}],"isRunning":false,"quotaCreateUpdateNum":null,"inQuotaLine":null,"backup":null}}
+        if(isSuccess(result)){
+            ImportResponse importResponse =JSON.parseObject(getPosition(result),ImportResponse.class);
+            if(importResponse .isSuccess()){
+                System.out.println(JSON.toJSONString(importResponse ));
+            }else{
+                System.out.println(JSON.toJSONString(importResponse ));
+            }
+        }else{
+            System.out.println("exception");
+        }
+    }
+    private static void vehicleRemove(){
+        String url="/fiscal/zcy.car.vehicle.delete";
+        List<String> stock=new ArrayList<>();
+        stock.add("44430");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("stockIds",stock);
+        String result=execRequest(jsonObject.toString(),url);
+        //{"success":true,"code":null,"message":null,"result":true}
+        //{"success":false,"code":"org.import.car.import.cannot.delete.not.normal.use.car","message":"org.import.car.import.cannot.delete.not.normal.use.car","result":null}
+        //{"success":false,"code":"car.stock.delete.only.import","message":"car.stock.delete.only.import","result":null}
+        if(isSuccess(result)){
+            VehicleDelResponse vehicleDelResponse =JSON.parseObject(getPosition(result),VehicleDelResponse.class);
+            if(vehicleDelResponse.isSuccess()&& vehicleDelResponse.isResult()){
+                System.out.println("del success");
+            }else{
+                System.out.println(vehicleDelResponse.getCode()+ vehicleDelResponse.getMessage());
+            }
+        }else{
             System.out.println("exception");
         }
 
@@ -271,6 +383,13 @@ public class RequestUtil {
         int pos=result.lastIndexOf("\"success\"")-1;
         return result.substring(pos,result.length());
     }
+    public static String getPosition(String result,int flag){
+        int pos=result.lastIndexOf("\"result\"")-1;
+        if(flag==0){
+            return result.substring(pos,result.length());
+        }
+        return result.substring(pos,result.length()-1);
+    }
     public static boolean isSuccess(String result){
         if(result.contains("200")&&result.contains("success")){
             return true;
@@ -292,13 +411,13 @@ public class RequestUtil {
                     SimpleDateFormat sdf = null;
                     // 验证short值
                     if (cell.getCellStyle().getDataFormat() == 14) {
-                        sdf = new SimpleDateFormat("yyyy/MM/dd");
+                        sdf = new SimpleDateFormat("yyyy-MM-dd");
                     } else if (cell.getCellStyle().getDataFormat() == 21) {
                         sdf = new SimpleDateFormat("HH:mm:ss");
                     } else if (cell.getCellStyle().getDataFormat() == 22) {
-                        sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     } else {
-                        throw new RuntimeException("日期格式错误!!!");
+                       return String.valueOf(cell.getDateCellValue());
                     }
                     Date date = cell.getDateCellValue();
                     cellValue = sdf.format(date);
@@ -327,5 +446,15 @@ public class RequestUtil {
                 break;
         }
         return cellValue;
+    }
+
+    public static String secondToDate(String seconds,String patten){
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis( Long.parseLong(seconds));
+//        return new SimpleDateFormat(patten).format(calendar.getTime());
+        return new SimpleDateFormat(patten).format(new Date(Long.parseLong(seconds)));
+    }
+    public static String pointToMilions(String amount){
+        return BigDecimal.valueOf(Long.valueOf(amount)).divide(new BigDecimal(1000000)).toString();
     }
 }

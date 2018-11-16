@@ -6,7 +6,7 @@ import lombok.Data;
  * 机构信息返回映射实体
  */
 @Data
-public class InstitutionRespModel {
+public class InstitutionResponse {
     private boolean success;
     private String code;
     private String message;

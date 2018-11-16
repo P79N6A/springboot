@@ -1,9 +1,9 @@
-package com.example.demo.model.car.orgDelResp;
+package com.example.demo.model.car.delResp;
 
 import lombok.Data;
 
 @Data
-public class OrgDelResp {
+public class VehicleDelResponse {
     private boolean success;
     private String code;
     private String message;

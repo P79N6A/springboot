@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.example.demo.common.RequestUtil;
 import com.example.demo.common.zcy.*;
 import com.example.demo.dao.AccountRespository;
 import com.example.demo.model.Account;
@@ -103,11 +104,11 @@ public class PurchaseServiceImpl implements PurchaseService {
                     if(result.contains("200")&&result.contains("success")&&result.contains("true")){
                         purchase.setExecute_result("SUCCESS");
                         purchaseRespository.save(purchase);
-                        return ApiResult.isSuccess(params.getUri(), JSON.toJSONString(params), result.substring(397,result.length()-2));
+                        return ApiResult.isSuccess(params.getUri(), JSON.toJSONString(params), RequestUtil.getPosition(result,1));
                     }else{
                         purchase.setExecute_result("FAILURE");
                         purchaseRespository.save(purchase);
-                        return ApiResult.isFailure(params.getUri(),"执行失败,请检查入参!",result.substring(396,result.length()-1));
+                        return ApiResult.isFailure(params.getUri(),"执行失败,请检查入参!",RequestUtil.getPosition(result,0));
                     }
 
                 } catch (Exception e) {

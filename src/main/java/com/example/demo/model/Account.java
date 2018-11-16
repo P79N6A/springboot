@@ -27,4 +27,10 @@ public class Account {
      */
     private int role;
     private String role_name;
+    /**0 不参与 1 参与 default 0**/
+    private int meeting;
+    /**检阅：0 未赴 1 已赴 default 0**/
+    private int review;
+    /**会议序列**/
+    private int sortLot;
 }

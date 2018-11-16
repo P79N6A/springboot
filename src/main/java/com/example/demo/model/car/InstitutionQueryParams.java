@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @Data
 public class InstitutionQueryParams {
+    private String districtCode;
     private String orgCode;
     private String orgName;
     private String orgRealName;

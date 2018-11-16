@@ -1,4 +1,4 @@
-package com.example.demo.model.car.orgImportResp;
+package com.example.demo.model.car.importResp;
 
 import lombok.Data;
 

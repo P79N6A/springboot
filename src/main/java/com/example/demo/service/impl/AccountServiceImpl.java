@@ -73,8 +73,9 @@ public class AccountServiceImpl implements AccountService {
                 Account this_=accountRespository.findOne(account.getId());
                 this_.setPassword(account.getPassword());
                 this_.setGmt_modify(Initialization.formatTime());
-                //this_.setNick_name(account.getNick_name());
-                //this_.setPhone(account.getPhone());
+//                this_.setNick_name(account.getNick_name());
+//                this_.setMeeting(1);
+//                this_.setSortLot(account.getSortLot());
                 accountRespository.save(this_);
                 return true;
             }
@@ -83,6 +84,30 @@ public class AccountServiceImpl implements AccountService {
         return false;
     }
 
+    @Override
+    public List<Account> showMeetingList() {
+        return accountRespository.findByMeeting(1,new Sort(new Sort.Order(Sort.Direction.ASC,"sortLot")));
+    }
+
+    @Override
+    public List<Account> getMeetingSequence(int meeting, int review) {
+        return accountRespository.findByMeetingAndReview(meeting,review,new Sort(new Sort.Order(Sort.Direction.ASC,"sortLot")));
+    }
+
+    @Override
+    public boolean updateSequence(String id,int review) {
+        if(StringUtils.isNotBlank(id)){
+            boolean exists=accountRespository.exists(id);
+            if(exists){
+                Account account=accountRespository.findOne(id);
+                account.setReview(review);
+                accountRespository.save(account);
+                return true;
+            }
+            return  false;
+        }
+        return false;
+    }
 
 
     private  String allotGroup(String g_id){
