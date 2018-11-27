@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 @Slf4j
@@ -417,13 +418,16 @@ public class RequestUtil {
                     } else if (cell.getCellStyle().getDataFormat() == 22) {
                         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     } else {
-                       return String.valueOf(cell.getDateCellValue());
+//                       return String.valueOf(cell.getDateCellValue()); v0
+                        sdf = new SimpleDateFormat("yyyy-MM-dd");
                     }
                     Date date = cell.getDateCellValue();
                     cellValue = sdf.format(date);
-                } else if (cell.getCellStyle().getDataFormat() == 0) {//处理数值格式
-                    cell.setCellType(Cell.CELL_TYPE_STRING);
-                    cellValue = String.valueOf(cell.getRichStringCellValue().getString());
+                }else{
+//                    cell.setCellType(Cell.CELL_TYPE_STRING); v1
+//                    cellValue = String.valueOf(cell.getRichStringCellValue().getString()); v1
+                    DecimalFormat df = new DecimalFormat("0");
+                    cellValue = df.format(cell.getNumericCellValue());
                 }
                 break;
             case Cell.CELL_TYPE_STRING: // 字符串
@@ -433,7 +437,12 @@ public class RequestUtil {
                 cellValue = String.valueOf(cell.getBooleanCellValue());
                 break;
             case Cell.CELL_TYPE_FORMULA: // 公式
-                cellValue = String.valueOf(cell.getCellFormula());
+               // cellValue = String.valueOf(cell.getCellFormula()); v1
+                try {
+                    cellValue = String.valueOf(cell.getStringCellValue());
+                } catch (IllegalStateException e) {
+                    cellValue = String.valueOf(cell.getNumericCellValue());
+                }
                 break;
             case Cell.CELL_TYPE_BLANK: // 空值
                 cellValue = "";
@@ -442,7 +451,7 @@ public class RequestUtil {
                 cellValue = "非法字符";
                 break;
             default:
-                cellValue = "未知类型";
+                cellValue = cell.getRichStringCellValue() == null ? null : cell.getRichStringCellValue().toString();
                 break;
         }
         return cellValue;

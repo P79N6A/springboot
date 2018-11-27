@@ -57,8 +57,8 @@ public class OrgManageController {
     }
 
     @PostMapping(value = "query")
-    public ResultBean queryOrg(@RequestParam(value = "orgName",required = false) String orgName,@RequestParam(value = "orgCode",required = false) String orgCode,@RequestParam(value = "orgRealName",required = false) String orgRealName,@RequestParam(value = "districtCode",required = false) String districtCode){
-        return new ResultBean<>(institutionService.queryOrg(districtCode,orgName,orgCode,orgRealName));
+    public ResultBean queryOrg(@RequestParam(value = "orgName",required = false) String orgName,@RequestParam(value = "orgCode",required = false) String orgCode,@RequestParam(value = "orgRealName",required = false) String orgRealName,@RequestParam(value = "districtCode",required = false) String districtCode,@RequestParam(value = "page",defaultValue ="1") Integer page, @RequestParam(value = "rows",defaultValue = "10")Integer rows){
+        return new ResultBean<>(institutionService.queryOrg(districtCode,orgName,orgCode,orgRealName,page,rows));
     }
 
     @PostMapping(value = "del")
@@ -78,6 +78,10 @@ public class OrgManageController {
     @GetMapping(value = "queryByStatusAndUser")
     public ResultBean<List<Institution>> queryByStatusAndUser(@RequestParam(value = "status") Integer status,@RequestParam(value = "operator") String operator){
         return new ResultBean<>(institutionService.findByUser(status,operator));
+    }
+    @GetMapping(value = "queryByOperatorAndOrgNameOfStatus")
+    public ResultBean<List<Institution>> queryByOperatorAndOrgNameOfStatus(@RequestParam(value = "operator")String operator,@RequestParam(value = "orgName")String orgName,@RequestParam(value = "status") Integer status){
+        return new ResultBean<>(institutionService.queryByOperatorAndOrgNameOfStatus(operator,orgName,status));
     }
     @PostMapping(value = "reset")
     public ResultBean reset(@RequestParam(value = "ids")String ids,@RequestParam(value = "operator") String operator){

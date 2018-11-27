@@ -13,6 +13,8 @@ public class InstitutionQueryParams {
     private String orgCode;
     private String orgName;
     private String orgRealName;
+    private int pageNo;
+    private int pageSize;
 
 
 }

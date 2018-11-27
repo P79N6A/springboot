@@ -11,4 +11,5 @@ public interface MenuService {
     boolean del(String id);
     List<Menu> findMenuByRole(int role);
     boolean updateMenu(Menu menu);
+    List<Menu> queryMenuListWithCode(String id);
 }

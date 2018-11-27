@@ -3,8 +3,6 @@ package com.example.demo.controller;
 import com.alibaba.fastjson.JSON;
 import com.example.demo.common.RequestUtil;
 import com.example.demo.common.ResultBean;
-import com.example.demo.model.car.Institution;
-import com.example.demo.model.car.InstitutionImportParams;
 import com.example.demo.model.car.Vehicle;
 import com.example.demo.model.car.VehicleImportParams;
 import com.example.demo.service.VehicleService;
@@ -64,8 +62,8 @@ public class VehicleManageController {
         return new ResultBean<>(vehicleService.findAll());
     }
     @PostMapping(value = "query")
-    public ResultBean queryVehicle(@RequestParam(value = "plateNo") String plateNo){
-        return new ResultBean<>(vehicleService.queryVehicle(plateNo));
+    public ResultBean queryVehicle(@RequestParam(value = "plateNo") String plateNo, @RequestParam(value = "page",defaultValue ="1") Integer page, @RequestParam(value = "rows",defaultValue = "10")Integer rows){
+        return new ResultBean<>(vehicleService.queryVehicle(plateNo,page,rows));
     }
     @PostMapping(value = "del")
     public ResultBean delVehicle(VehicleImportParams vehicleImportParams,@RequestParam(value = "stockId") String stockId,@RequestParam(value = "operator")String operator){
@@ -82,6 +80,11 @@ public class VehicleManageController {
     @GetMapping(value = "queryByStatusAndUser")
     public ResultBean<List<Vehicle>> queryByStatusAndUser(@RequestParam(value = "status") Integer status,@RequestParam(value = "operator") String operator){
         return new ResultBean<>(vehicleService.findByUser(status,operator));
+    }
+
+    @GetMapping(value = "queryByIsDeleteAndOrgNameAndPlateNoAndOperator")
+    public ResultBean<List<Vehicle>> queryByIsDeleteAndOrgNameAndPlateNoAndOperator(@RequestParam(value = "status") Integer status,@RequestParam(value = "operator") String operator,@RequestParam(value = "orgName") String orgName,@RequestParam(value = "plateNo") String plateNo){
+        return new ResultBean<>(vehicleService.findByIsDeleteAndOrgNameAndPlateNoAndOperator(status,orgName,plateNo,operator));
     }
 
     @PostMapping(value = "reset")

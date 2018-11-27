@@ -11,5 +11,7 @@ import java.util.List;
 public interface InstitutionRespository extends MongoRepository<Institution,String> {
     Institution findByOrgCodeAndOrgName(String orgCode,String orgName);
     List<Institution> findByIsDelete(int isDelete,Sort sort);
-    List<Institution> findByIsDeleteAndOperator(int isDelete,String operator,Sort sort);
+    List<Institution> findByOrgNameAndIsDelete(String orgName,int isDelete,Sort sort);
+    List<Institution> findByOperatorAndIsDelete(String operator,int isDelete,Sort sort);
+    List<Institution> findByOrgNameAndOperatorAndIsDelete(String orgName,String operator,int isDelete,Sort sort);
 }

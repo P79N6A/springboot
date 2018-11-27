@@ -57,11 +57,13 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public ResultBean queryVehicle(String plateNo) {
+    public ResultBean queryVehicle(String plateNo,int page,int rows) {
         if(StringUtils.isNotBlank(plateNo)){
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("plateNo",plateNo);
             jsonObject.put("labelType",1);
+            jsonObject.put("pageNo",page);
+            jsonObject.put("pageSize",rows);
             log.info(jsonObject.toString());
             String result=RequestUtil.execRequest(jsonObject.toString(),Config.VEHICLE_INIT_QUERY);
             if(RequestUtil.isSuccess(result)){
@@ -171,6 +173,31 @@ public class VehicleServiceImpl implements VehicleService {
     public List<Vehicle> findByUser(int status, String operator) {
         return vehicleRespository.findByIsDeleteAndOperator(status,operator,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
     }
+
+    @Override
+    public List<Vehicle> findByIsDeleteAndOrgNameAndPlateNoAndOperator(int status, String orgName, String plateNo, String operator) {
+        boolean orgNames=StringUtils.isNotBlank(orgName);
+        boolean plateNos=StringUtils.isNotBlank(plateNo);
+        boolean operators=StringUtils.isNotBlank(operator);
+        if(orgNames&&plateNos&&operators){
+            return  vehicleRespository.findByIsDeleteAndOrgNameAndPlateNoAndOperator(status,orgName,plateNo,operator,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else if(!orgNames&&plateNos&&operators){
+            return vehicleRespository.findByIsDeleteAndOperatorAndPlateNo(status,operator,plateNo,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else if(orgNames&&!plateNos&&operators){
+            return vehicleRespository.findByIsDeleteAndOrgNameAndOperator(status,orgName,operator,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else if(orgNames&&plateNos&&!operators){
+            return vehicleRespository.findByIsDeleteAndOrgNameAndPlateNo(status,orgName,operator,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else if(orgNames&&!plateNos&&!operators){
+            return  vehicleRespository.findByIsDeleteAndOrgName(status,orgName,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else if(!orgNames&&plateNos&&!operators){
+            return vehicleRespository.findByIsDeleteAndPlateNo(status,plateNo,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else if(!orgNames&&!plateNos&&operators){
+            return  vehicleRespository.findByIsDeleteAndOperator(status,operator,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else{
+            return  vehicleRespository.findByIsDelete(status,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }
+    }
+
     private void saveVehicle(List<VehicleImportParams> vehicleImportParamsList,String operator){
        Vehicle vehicle;
        Vehicle vehicle_exit;

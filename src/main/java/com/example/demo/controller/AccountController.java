@@ -77,4 +77,9 @@ public class AccountController {
         return new ResultBean<>(accountService.showMeetingList());
     }
 
+    @PostMapping(value = "updateRoleWithCode")
+    public  ResultBean<Boolean> updateRoleWithCode(@RequestParam(value = "id") String id,@RequestParam(value = "code")String codes) {
+        return new ResultBean<>(accountService.updateRoleWithCode(id,codes));
+    }
+
 }

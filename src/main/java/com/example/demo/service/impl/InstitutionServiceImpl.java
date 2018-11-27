@@ -59,7 +59,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public ResultBean queryOrg(String districtCode,String orgName,String orgCode,String orgRealName) {
+    public ResultBean queryOrg(String districtCode,String orgName,String orgCode,String orgRealName,int page,int rows) {
         InstitutionQueryParams params=new InstitutionQueryParams();
         if(!"".equals(districtCode)&&StringUtils.isNotBlank(districtCode)){
             params.setDistrictCode(districtCode);
@@ -73,6 +73,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         if(!"".equals(orgRealName)||StringUtils.isNotBlank(orgRealName)){
             params.setOrgRealName(orgRealName);
         }
+        params.setPageNo(page);
+        params.setPageSize(rows);
         log.info("request params:"+JSON.toJSONString(RequestUtil.convert2Map(params)));
         String result=RequestUtil.execRequest(JSON.toJSONString(RequestUtil.convert2Map(params)),Config.ORG_INIT_QUERY);
         log.info(result);
@@ -157,7 +159,23 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<Institution> findByUser(int status, String operator) {
-        return institutionRespository.findByIsDeleteAndOperator(status,operator,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        return institutionRespository.findByOperatorAndIsDelete(operator,status,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+    }
+
+    @Override
+    public List<Institution> queryByOperatorAndOrgNameOfStatus(String operator, String orgName,int status) {
+        boolean operators=StringUtils.isNotBlank(operator);
+        boolean orgNames=StringUtils.isNotBlank(orgName);
+        if(operators&&orgNames){
+            return institutionRespository.findByOrgNameAndOperatorAndIsDelete(orgName,operator,status,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else if(operators&&!orgNames){
+            return institutionRespository.findByOperatorAndIsDelete(operator,status,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else if(!operators&&orgNames){
+            return institutionRespository.findByOrgNameAndIsDelete(orgName,status,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }else{
+            return institutionRespository.findByIsDelete(status,new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+        }
+
     }
 
     private String formatTime(){

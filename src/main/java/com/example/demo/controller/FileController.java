@@ -8,10 +8,7 @@ import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -83,17 +80,17 @@ public class FileController {
      * @param ids
      * @return
      */
-    @RequestMapping(value = "findByIds")
+    @GetMapping(value = "findByIds")
     public ResultBean<List<File>> findByIds(@RequestParam(value = "ids") String ids) {
         return new ResultBean<>(fileService.findByIds(ids));
     }
 
-    @RequestMapping(value = "findAll")
+    @GetMapping(value = "findAll")
     public ResultBean<List<File>> findAll() {
         return new ResultBean<>(fileService.findAll());
     }
 
-    @RequestMapping(value = "del")
+    @PostMapping(value = "del")
     public  ResultBean<Boolean> del(String id) {
         return new ResultBean<>(fileService.removeFile(id));
     }

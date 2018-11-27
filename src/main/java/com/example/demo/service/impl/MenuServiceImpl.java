@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.common.Initialization;
+import com.example.demo.dao.AccountRespository;
 import com.example.demo.dao.MenuRespository;
 import com.example.demo.model.Account;
 import com.example.demo.model.Menu;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MenuServiceImpl implements MenuService {
     @Autowired
     private MenuRespository menuRespository;
+    @Autowired
+    private AccountRespository accountRespository;
 
     @Override
     public boolean addMenu(Menu menu) {
@@ -69,13 +73,28 @@ public class MenuServiceImpl implements MenuService {
             boolean ex=menuRespository.exists(menu.getId());
             if(ex){
                Menu mu=menuRespository.findOne(menu.getId());
-               mu.setIcon(menu.getIcon());
+               //mu.setIcon(menu.getIcon());
+                mu.setRoleCode(menu.getRoleCode());
                menuRespository.save(mu);
                 return true;
             }
             return  false;
         }
         return false;
+    }
+
+    @Override
+    public List<Menu> queryMenuListWithCode(String id) {
+        if(StringUtils.isNotBlank(id)){
+            List<Integer> roleCodeList =new ArrayList<>();
+            Account account=accountRespository.findOne(id);
+            String[] roleCode=account.getRoleLot().split(",");
+            for (int i = 0; i <roleCode.length; i++) {
+                roleCodeList.add(Integer.valueOf(roleCode[i]));
+            }
+            return menuRespository.findByRoleCodeWithin(roleCodeList,new Sort(new Sort.Order(Sort.Direction.ASC,"sort_code")));
+        }
+       return null;
     }
 
 

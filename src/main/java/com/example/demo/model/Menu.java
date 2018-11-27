@@ -23,4 +23,6 @@ public class Menu {
     private String  role_name;
     private String operator_id;
     private String operator_name;
+    /**权限码 100X:通用权限，默认分配 200X: 需申请权限 300X:专属权限**/
+    private int roleCode;
 }

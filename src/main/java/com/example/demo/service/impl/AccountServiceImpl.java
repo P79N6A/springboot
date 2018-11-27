@@ -1,30 +1,36 @@
 package com.example.demo.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.example.demo.common.Initialization;
 import com.example.demo.dao.AccountRespository;
+import com.example.demo.dao.MenuRespository;
 import com.example.demo.dao.UserRespository;
 import com.example.demo.model.Account;
+import com.example.demo.model.Menu;
 import com.example.demo.model.User;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Slf4j
 public class AccountServiceImpl implements AccountService {
     @Autowired
     private AccountRespository accountRespository;
+    @Autowired
+    private MenuRespository menuRespository;
 
     @Override
     public boolean addAccount(Account account) {
+        log.info("account request params:"+JSON.toJSONString(account));
         if (StringUtils.isNotBlank(account.getAccount()) && StringUtils.isNotBlank(account.getNick_name())) {
                 account.setGroup(allotGroup(account.getGroup()));
                 account.setStatus_name(allotStatus(Initialization.ACCOUNT_STATUS));
@@ -32,6 +38,18 @@ public class AccountServiceImpl implements AccountService {
                 account.setGmt_create(Initialization.formatTime());
                 account.setStatus(Initialization.ACCOUNT_STATUS);
                 account.setPassword(Initialization.ACCOUNT_INIT_PWD);
+                if(!StringUtils.isNotBlank(account.getRoleLot())){
+                    if (account.getRole()==0||account.getRole()==1){
+                        List<Menu> menuList=menuRespository.findByStatus(10);
+                        StringBuffer stringBuffer=new StringBuffer();
+                        for (int i = 0; i <menuList.size() ; i++) {
+                            stringBuffer.append(menuList.get(i).getRoleCode()).append(",");
+                        }
+                        account.setRoleLot(stringBuffer.toString());
+                    }else{
+                        account.setRoleLot("1001");
+                    }
+                }
                 accountRespository.save(account);
             return true;
         }
@@ -109,6 +127,39 @@ public class AccountServiceImpl implements AccountService {
         return false;
     }
 
+    @Override
+    public boolean updateRoleWithCode(String id, String codes) {
+        log.info("role list:"+codes);
+        if(StringUtils.isNotBlank(id)){
+            boolean exists=accountRespository.exists(id);
+            if(exists){
+                Account account=accountRespository.findOne(id);
+//                Set<String> set=new HashSet<>();
+//                if(StringUtils.isNotBlank(account.getRoleLot())){
+//                    String[] oleCode=account.getRoleLot().split(",");
+//                    for (int i = 0; i <oleCode.length ; i++) {
+//                        set.add(oleCode[i]);
+//                    }
+//                }
+//
+//                log.info(JSON.toJSONString(set));
+//                String[] newCode=codes.replaceAll("\"","").split(",");
+//                for (int j = 0; j <newCode.length ; j++) {
+//                    set.add(newCode[j]);
+//                }
+//                log.info(JSON.toJSONString(set));
+//                String currentCode=StringUtils.join(set.toArray(),",");
+//                log.info("result role code list:"+currentCode);
+                account.setRoleLot(codes);
+                account.setGmt_modify(Initialization.formatTime());
+                accountRespository.save(account);
+                return true;
+            }
+            return  false;
+        }
+        return false;
+    }
+
 
     private  String allotGroup(String g_id){
         Map<String,String > m=new ConcurrentHashMap<>();
@@ -137,5 +188,6 @@ public class AccountServiceImpl implements AccountService {
         map.put(3,"用户");
         return  map.get(rid);
     }
+
 
 }

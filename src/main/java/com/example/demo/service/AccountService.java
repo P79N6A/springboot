@@ -14,4 +14,5 @@ public interface AccountService {
     List<Account> showMeetingList();
     List<Account> getMeetingSequence(int meeting,int review);
     boolean updateSequence(String id,int review);
+    boolean updateRoleWithCode(String id,String codes);
 }

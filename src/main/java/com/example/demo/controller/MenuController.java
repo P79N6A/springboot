@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -27,7 +28,7 @@ public class MenuController {
      * @param menu
      * @return boolean
      */
-    @RequestMapping(value = "add")
+    @PostMapping(value = "add")
     public ResultBean<Boolean> add(Menu menu) {
         return new ResultBean<>(menuService.addMenu(menu));
     }
@@ -38,28 +39,33 @@ public class MenuController {
      * @param id
      * @return menu
      */
-    @RequestMapping(value = "find_by_id")
+    @GetMapping(value = "find_by_id")
     public ResultBean<Menu> findById(@RequestParam(value = "id") String id) {
         return new ResultBean<>(menuService.findById(id));
     }
 
-    @RequestMapping(value = "findAll")
+    @GetMapping(value = "findAll")
     public ResultBean<List<Menu>> findAll() {
         return new ResultBean<>(menuService.findAll());
     }
 
-    @RequestMapping(value = "del")
+    @PostMapping(value = "del")
     public  ResultBean<Boolean> del(String id) {
         return new ResultBean<>(menuService.del(id));
     }
 
 
-    @RequestMapping(value = "init")
+    @GetMapping(value = "init")
     public  ResultBean<List<Menu>> findMenuByRole(int role) {
             return new ResultBean<>(menuService.findMenuByRole(role));
     }
 
-    @RequestMapping(value = "update")
+    @GetMapping(value = "listWithCode")
+    public  ResultBean<List<Menu>> queryMenuListWithCode(String id) {
+        return new ResultBean<>(menuService.queryMenuListWithCode(id));
+    }
+
+    @PostMapping(value = "update")
     public  ResultBean<Boolean> del(Menu menu) {
         return new ResultBean<>(menuService.updateMenu(menu));
     }

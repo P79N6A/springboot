@@ -33,4 +33,6 @@ public class Account {
     private int review;
     /**会议序列**/
     private int sortLot;
+    /**菜单权限列表**/
+    private String roleLot;
 }

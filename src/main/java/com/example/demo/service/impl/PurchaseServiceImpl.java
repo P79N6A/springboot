@@ -5,6 +5,10 @@ import com.example.demo.common.RequestUtil;
 import com.example.demo.common.zcy.*;
 import com.example.demo.dao.AccountRespository;
 import com.example.demo.model.Account;
+import com.example.demo.model.car.vehicleQueryResp.VehicleQueryResponse;
+import com.example.demo.model.purchase.response.OldPurchaseResponse;
+import com.example.demo.model.purchase.response.PurchaseResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.example.demo.common.ApiResult;
@@ -26,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+@Slf4j
 @Service
 public class PurchaseServiceImpl implements PurchaseService {
     @Autowired
@@ -38,6 +42,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     public ApiResult addPurchase(RelationInfo relationInfo) {
+        log.info("vue入参："+JSON.toJSONString(relationInfo));
         Purchase purchase=new Purchase();
         Params params;
         Params params2=null;
@@ -100,15 +105,52 @@ public class PurchaseServiceImpl implements PurchaseService {
                     }else{
                        result  = httpClient.httpPost(params.getUri(), Config.CHARSET, params.getHeaders(), params.getBodyMap());
                     }
+                    log.info("请求参数："+JSON.toJSONString(params));
+                    log.info("接口返回："+result);
                     purchase.setResponse_data(result);
+                    String respString;
+                    if(relationInfo.getRequest_type()==4||relationInfo.getRequest_type()==6){
+                        respString=RequestUtil.getPosition(result);
+                    }else{
+                        respString=RequestUtil.getPosition(result,1);
+                    }
                     if(result.contains("200")&&result.contains("success")&&result.contains("true")){
                         purchase.setExecute_result("SUCCESS");
                         purchaseRespository.save(purchase);
-                        return ApiResult.isSuccess(params.getUri(), JSON.toJSONString(params), RequestUtil.getPosition(result,1));
+                        return ApiResult.isSuccess(params.getUri(), JSON.toJSONString(params),respString);
+
+//                        String resp;
+//                        boolean flag;
+//                        if(result.contains("\"result\"")){
+//                            if(result.contains("true")){
+//                                OldPurchaseResponse oldPurchaseResponse=JSON.parseObject(RequestUtil.getPosition(result,0),OldPurchaseResponse.class);
+//                                flag=oldPurchaseResponse.getResult().isSuccess();
+//                                resp=JSON.toJSONString(oldPurchaseResponse);
+//                            }else{
+//                                flag=false;
+//                                resp=RequestUtil.getPosition(result,1);
+//                            }
+//
+//                        }else {
+//                            PurchaseResponse purchaseResponse=JSON.parseObject(RequestUtil.getPosition(result),PurchaseResponse.class);
+//                            flag=purchaseResponse.isSuccess();
+//                            resp=JSON.toJSONString(purchaseResponse);
+//
+//                        }
+//                        if (flag){
+//                            purchase.setExecute_result("SUCCESS");
+//                            purchaseRespository.save(purchase);
+//                            return ApiResult.isSuccess(params.getUri(), JSON.toJSONString(params),resp );
+//                        }else{
+//                            purchase.setExecute_result("FAILURE");
+//                            purchaseRespository.save(purchase);
+//                            return ApiResult.isFailure(params.getUri(),"执行失败,请检查入参!",resp);
+//                        }
+
                     }else{
                         purchase.setExecute_result("FAILURE");
                         purchaseRespository.save(purchase);
-                        return ApiResult.isFailure(params.getUri(),"执行失败,请检查入参!",RequestUtil.getPosition(result,0));
+                        return ApiResult.isFailure(params.getUri(),"执行失败,请检查入参!",respString);
                     }
 
                 } catch (Exception e) {
@@ -189,18 +231,12 @@ public class PurchaseServiceImpl implements PurchaseService {
         relationParam.put("quantity",relationInfo.getQuantity());
         relationList.put(relationParam);
         JSONObject outObject = new JSONObject();
-        if(relationInfo.getRequest_type()==Config.RELATION_UPDATE) {
-            outObject.put("userid",Long.parseLong(relationInfo.getUser_id()));
-        }else{
-            outObject.put("userId",Long.parseLong(relationInfo.getUser_id()));
-
-        }
+        outObject.put("userId",Long.parseLong(relationInfo.getUser_id()));
         outObject.put("relationType",relationInfo.getRelation_type());
         outObject.put("relationID",Long.parseLong(relationInfo.getRelation_id()));
         outObject.put("relationList", relationList);
         String strBody = outObject.toString();
         bodyMap.put("_data_", strBody);
-
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
         headers.put("X-Ca-Key", Config.APP_KEY);
@@ -229,7 +265,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         Map<String, Object> bodyMap = new HashMap<>();
         JSONObject outObject = new JSONObject();
         if(relationInfo.getRequest_type()==Config.RELATION_DELETE){
-            outObject.put("userid",Long.parseLong(relationInfo.getUser_id()));
+            outObject.put("userId",Long.parseLong(relationInfo.getUser_id()));
             outObject.put("relationType", relationInfo.getRelation_type());
             outObject.put("relationID",Long.parseLong(relationInfo.getRelation_id()));
         }else{
@@ -267,11 +303,11 @@ public class PurchaseServiceImpl implements PurchaseService {
         JSONObject outObject = new JSONObject();
         JSONObject sonObject = new JSONObject();
         outObject.put("relationType",relationInfo.getRelation_type());
-        outObject.put("settlementDto",sonObject);
-        sonObject.put("amount",relationInfo.getAmount());
-        sonObject.put("quantity",relationInfo.getQuantity());
-        sonObject.put("relationId",relationInfo.getRelation_id());
-        sonObject.put("planId",relationInfo.getPurchase_id());
+//        outObject.put("settlementDto",sonObject);
+        outObject.put("amount",relationInfo.getAmount());
+        outObject.put("quantity",relationInfo.getQuantity());
+        outObject.put("relationId",relationInfo.getRelation_id());
+        outObject.put("planId",relationInfo.getPurchase_id());
         //sonObject.put("settlementId",0);
         String strBody = outObject.toString();
         bodyMap.put("_data_", strBody);
