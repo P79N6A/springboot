@@ -10,7 +10,15 @@ import com.example.demo.model.car.delResp.VehicleDelResponse;
 import com.example.demo.model.car.importResp.ImportResponse;
 import com.example.demo.model.car.orgQueryResp.InstitutionResponse;
 import com.example.demo.model.car.vehicleQueryResp.VehicleQueryResponse;
+import com.example.demo.model.purchase.response.DateResponse;
+import com.example.demo.model.purchase.response.UserAuthResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,12 +27,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -60,7 +68,57 @@ public class RequestUtil {
         }
         return result;
     }
-
+    public static String execRequest(String gateway,String key,String secret,String json,String uri){
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("_data_", json);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+        headers.put("X-Ca-Timestamp", String.valueOf(new Date().getTime()));
+        headers.put("X-Ca-Key", key);
+        headers.put("X-Ca-Format", "json2");
+        headers.put("Accept", "application/json");
+        String stringToSign = SignUtil.buildStringToSign(uri, headers, bodyMap, "POST");
+        Signer signer = new ShaHmac256();
+        String signature = signer.sign(secret, stringToSign, "utf-8");
+        headers.put("X-Ca-Signature", signature);
+        HttpClient httpClient = new HttpClient();
+        httpClient.setAllowedRetry(false);
+        httpClient.setConnTimeOutMilSeconds(100000);
+        httpClient.setTimeOutMilSeconds(100000);
+        httpClient.start();
+        String result;
+        try {
+            result = httpClient.httpPost(gateway + uri, "utf-8", headers, bodyMap);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            result=sw.toString();
+        }
+        return result;
+    }
+    public static String authRequest(String json,String uri){
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+//        headers.put("X-Ca-Timestamp", String.valueOf(new Date().getTime()));
+        headers.put("X-Ca-Format", "json2");
+        headers.put("Accept", "application/json");
+        HttpClient httpClient = new HttpClient();
+        httpClient.setAllowedRetry(false);
+        httpClient.setConnTimeOutMilSeconds(100000);
+        httpClient.setTimeOutMilSeconds(100000);
+        httpClient.start();
+        String response;
+        try {
+            response = httpClient.httpPost(uri, "utf-8",headers,json);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            response=sw.toString();
+        }
+        return response;
+    }
     public static void main(String[] args){
        //orgnQuery();
        //importOrg();
@@ -72,7 +130,7 @@ public class RequestUtil {
 //        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(timestamp));
 //        System.out.println(date);
 //        System.out.println(secondToDate("-2035785600000","yyyy-MM-dd"));
-        System.out.println(pointToMilions("600000"));
+
 
     }
 
@@ -426,7 +484,7 @@ public class RequestUtil {
                 }else{
 //                    cell.setCellType(Cell.CELL_TYPE_STRING); v1
 //                    cellValue = String.valueOf(cell.getRichStringCellValue().getString()); v1
-                    DecimalFormat df = new DecimalFormat("0");
+                    DecimalFormat df = new DecimalFormat("0.####");
                     cellValue = df.format(cell.getNumericCellValue());
                 }
                 break;
@@ -465,5 +523,43 @@ public class RequestUtil {
     }
     public static String pointToMilions(String amount){
         return BigDecimal.valueOf(Long.valueOf(amount)).divide(new BigDecimal(1000000)).toString();
+    }
+    public static void httpPost(String token,String msg)throws Exception{
+        org.apache.http.client.HttpClient httpclient = HttpClients.createDefault();
+        HttpPost httppost = new HttpPost(token);
+        httppost.addHeader("Content-Type", "application/json; charset=utf-8");
+        StringEntity se = new StringEntity(msg, "utf-8");
+        httppost.setEntity(se);
+        HttpResponse response = httpclient.execute(httppost);
+        if (response.getStatusLine().getStatusCode()== HttpStatus.SC_OK){
+            String result= EntityUtils.toString(response.getEntity(), "utf-8");
+        }
+    }
+
+    public static DateResponse dateRequest(String httpArg) {
+        BufferedReader reader = null;
+        String result = null;
+        DateResponse dateResponse = null;
+        StringBuffer sbf = new StringBuffer();
+        String httpUrl = "http://api.goseek.cn/Tools/holiday?date=" + httpArg;
+        try {
+            URL url = new URL(httpUrl);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            InputStream is = connection.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            String strRead = null;
+            while ((strRead = reader.readLine()) != null) {
+                sbf.append(strRead);
+                sbf.append("\r\n");
+            }
+            reader.close();
+            result = sbf.toString();
+            dateResponse =JSON.parseObject(result,DateResponse.class);//转为JSONObject对象
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dateResponse;
     }
 }

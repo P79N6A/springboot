@@ -15,4 +15,5 @@ public interface WorkDutyRespository extends MongoRepository<WorkDuty,String> {
     //{'startTime':{'$lte':'2018-09-07'}, 'endTime': {'$gte':'2018-09-07'}}
     @Query(value = "{'startTime':{'$lte':?0}, 'endTime': {'$gte':?0}}")
     WorkDuty findByStartTimeAndEndTime(String time);
+    WorkDuty findByMothAndLockUser(String month,String lockUser,Sort sort);
 }

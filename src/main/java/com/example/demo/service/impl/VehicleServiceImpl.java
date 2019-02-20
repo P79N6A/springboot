@@ -33,6 +33,7 @@ public class VehicleServiceImpl implements VehicleService {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("importInfo",vehicleImportParamsList);
         String result=RequestUtil.execRequest(jsonObject.toString(), Config.VEHICLE_INIT_IMPORT);
+        log.info("exe resp:"+result);
         if(RequestUtil.isSuccess(result)){
             ImportResponse importResponse =JSON.parseObject(RequestUtil.getPosition(result),ImportResponse.class);
             log.info(JSON.toJSONString(importResponse));
@@ -50,7 +51,7 @@ public class VehicleServiceImpl implements VehicleService {
                     return  ResultBean.isSuccess(importResponse);
                 }
             }else{
-                return  ResultBean.isFailure("导入的车辆参数列表异常");
+                return  ResultBean.isFailure("参数校验异常,第2行组织机构代码错误,平台不存在!");
             }
         }
         return ResultBean.isThrows("请求链路异常,请稍后再试");
@@ -100,6 +101,7 @@ public class VehicleServiceImpl implements VehicleService {
                     if (vehicle_exit==null){
                         Vehicle vehicle=new Vehicle();
                         vehicle.setGmt_create(formatTime());
+                        vehicle.setGmt_modify(formatTime());
                         vehicle.setIsDelete(1);
                         vehicle.setOrgCode(vehicleImportParams.getOrgCode());
                         vehicle.setOrgName(vehicleImportParams.getOrgName());
@@ -144,6 +146,14 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public List<Vehicle> findAll() {
+//        List<Vehicle> list=vehicleRespository.findAll(new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
+//        Vehicle vehicles;
+//        for (int i = 0; i <list.size() ; i++) {
+//            vehicles=vehicleRespository.findOne(list.get(i).getId());
+//            vehicles.setGmt_create(null);
+//            vehicles.setGmt_modify(null);
+//            vehicleRespository.save(vehicles);
+//        }
         return vehicleRespository.findAll(new Sort(new Sort.Order(Sort.Direction.DESC,"gmt_create")));
     }
 

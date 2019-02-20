@@ -31,8 +31,17 @@ public class Account {
     private int meeting;
     /**检阅：0 未赴 1 已赴 default 0**/
     private int review;
+    /**检阅：0 未轮值 1 已轮值 default 0**/
+    private int lock;
     /**会议序列**/
     private int sortLot;
     /**菜单权限列表**/
     private String roleLot;
+    /**auth v2 add columns **/
+    private String employeeId;
+    private String realName;
+    private String avatar;
+    private String mail;
+    private String department;
+
 }

@@ -18,4 +18,5 @@ public interface WorkDutyService {
     DutySheet findSheetById(String id);
     WorkDuty findByStartTimeRange(String time);
     String findDutyByCurrentTime(String uid);
+    WorkDuty findByMothAndLockUser(String month,String lockUser);
 }

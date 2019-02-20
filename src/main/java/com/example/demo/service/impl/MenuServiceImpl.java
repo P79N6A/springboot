@@ -74,8 +74,9 @@ public class MenuServiceImpl implements MenuService {
             if(ex){
                Menu mu=menuRespository.findOne(menu.getId());
                //mu.setIcon(menu.getIcon());
-                mu.setRoleCode(menu.getRoleCode());
-               menuRespository.save(mu);
+                //mu.setRoleCode(menu.getRoleCode());
+                mu.setType(menu.getType());
+                menuRespository.save(mu);
                 return true;
             }
             return  false;

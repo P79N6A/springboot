@@ -19,6 +19,18 @@ public class WorkDuty {
     private String startTime;
     private String endTime;
     private String workLot;
-    private  int status;
+    private int status;
+    /**值班类型：0.正常 1.非常规、早晚班 **/
+    private int type;
+    private String early;
+    private String late;
+    private String earlyLot;
+    private String lateLot;
+    private String earlyPhone;
+    private String latePhone;
+    private String lockUser;
+    private String lockLot;
+
+
 
 }

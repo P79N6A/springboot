@@ -13,4 +13,6 @@ public interface AccountRespository extends MongoRepository<Account,String> {
     Account findByAccountAndPasswordAndStatus(String account,String password,int status);
     List<Account> findByMeeting(int meeting, Sort sort);
     List<Account> findByMeetingAndReview(int meeting,int review,Sort sort);
+    List<Account> findByLockAndMeeting(int lock,int meeting,Sort sort);
+    Account findByAccountAndRealNameAndStatus(String account,String realName,int status);
 }

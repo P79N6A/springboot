@@ -52,7 +52,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                     return  ResultBean.isSuccess(importResponse);
                 }
             }else{
-                return  ResultBean.isFailure("导入的机构参数列表有误");
+                return  ResultBean.isFailure("参数校验异常,第2行组织机构代码错误,平台不存在!");
             }
         }
         return ResultBean.isThrows("请求链路异常,请稍后再试");
@@ -107,6 +107,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                     if (institution_exit==null){
                         Institution institution=new Institution();
                         institution.setGmt_create(formatTime());
+                        institution.setGmt_modify(formatTime());
                         institution.setIsDelete(1);
                         institution.setOrgCode(orgCode);
                         institution.setOrgName(orgName);
@@ -131,6 +132,14 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<Institution> findAll() {
+//        List<Institution> list=institutionRespository.findAll(new Sort(new Sort.Order(Sort.Direction.DESC,"id")));
+//        Institution institutions;
+//        for (int i = 0; i <list.size() ; i++) {
+//            institutions=institutionRespository.findOne(list.get(i).getId());
+//            institutions.setGmt_modify(null);
+//            institutions.setGmt_create(null);
+//            institutionRespository.save(institutions);
+//        }
         return institutionRespository.findAll(new Sort(new Sort.Order(Sort.Direction.DESC,"id")));
 
     }

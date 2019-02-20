@@ -25,4 +25,6 @@ public class Menu {
     private String operator_name;
     /**权限码 100X:通用权限，默认分配 200X: 需申请权限 300X:专属权限**/
     private int roleCode;
+    /**归属类型:采购计划1 项目采购2 车辆控购3 常用工具4 用户管理5 其他设置6**/
+    private int type;
 }

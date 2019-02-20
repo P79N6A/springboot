@@ -60,6 +60,12 @@ public class AccountController {
     public  ResultBean<Account> login(@RequestParam(value = "account") String account,@RequestParam(value = "password") String password) {
         return new ResultBean<>(accountService.findByAccountAndPassword(account,password));
     }
+    @ApiOperation(value = "域登录",notes = "用户域账号登录接口")
+    @GetMapping(value = "authLogin")
+    public  ResultBean authLogin(@RequestParam(value = "userName") String userName,@RequestParam(value = "password") String password) {
+        return new ResultBean<>(accountService.authLogin(userName,password));
+    }
+
     @ApiOperation(value = "用户更新",notes="更新用户信息接口")
     @PostMapping(value = "update")
     public  ResultBean<Boolean> update(Account account) {
@@ -70,11 +76,20 @@ public class AccountController {
     public  ResultBean<Boolean> updateSequence(@RequestParam(value = "id") String id,@RequestParam(value = "review")Integer review) {
         return new ResultBean<>(accountService.updateSequence(id,review));
     }
+    @PostMapping(value = "updateLock")
+    public  ResultBean<Boolean> updateLock(@RequestParam(value = "id") String id,@RequestParam(value = "lock")Integer lock) {
+        return new ResultBean<>(accountService.updateLock(id,lock));
+    }
 
     @ApiOperation(value = "会议通知列表",notes="会议通知列表")
     @GetMapping(value = "showMeetingList")
     public  ResultBean<List<Account>> showMeetingList() {
         return new ResultBean<>(accountService.showMeetingList());
+    }
+
+    @GetMapping(value = "showLockList")
+    public  ResultBean<List<Account>> showLockList() {
+        return new ResultBean<>(accountService.getLockSequence(0,1));
     }
 
     @PostMapping(value = "updateRoleWithCode")

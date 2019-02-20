@@ -39,7 +39,7 @@ public class PurchaseController {
         return new ResultBean<>(purchaseService.findAll());
     }
 
-    @RequestMapping(value = "del")
+    @PostMapping(value = "del")
     public  ResultBean<Boolean> del(String id) {
         return new ResultBean<>(purchaseService.del(id));
     }

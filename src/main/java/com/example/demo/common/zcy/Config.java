@@ -26,11 +26,10 @@ public class Config {
     public static final String URI_PPLAN_DEBUG_REVOKE_SETTLEDMONEY = "/test/pplan.debug.revoke.settledmoney";
     /**采购计划新增**/
     public static final String PURCHASE_PLAN_CREATE = "/integration/zcy.govsyncagency.pplan.add";
-    /***释放：冻结>>可用*/
+    /***释放：冻结>>已用*/
     public static final String URI_PPLAN_RELATION_SETTLEMENT = "/test/plan.debug.settlement";
     /**合同备案状态更新*/
     public static final String RECORD_REVOKE_UPDATE = "/integration/zcy.record.revoke.status.update";
-
     /**车辆控购接口名称列表**/
     /**机构导入**/
     public static final String ORG_INIT_IMPORT= "/fiscal/zcy.car.org.init.import";
@@ -44,8 +43,11 @@ public class Config {
     public static final String VEHICLE_INIT_QUERY= "/fiscal/zcy.car.vehicle.list";
     /**车辆删除**/
     public static final String VEHICLE_INIT_DELETE= "/fiscal/zcy.car.vehicle.delete";
-
-
+    /**域账号 登陆验证 登出 token校验 **/
+    public static final String  USER_AUTH_LOGIN= "http://ipaas.cai-inc.com/api/auth-service/auth/login";
+    public static final String  USER_AUTH_OUT= "http://ipaas.cai-inc.com/api/auth-service/auth/logout";
+    public static final String  USER_TOKEN_VERIFY= "http://ipaas.cai-inc.com/api/auth-service/auth/checkToken";
+    public static final String WEBHOOK_TOKEN = "https://oapi.dingtalk.com/robot/send?access_token=be565b17b6fd1d5d61b2ab5c0719a534fc2dd22069d60c99a72698ad7122b952";
     public static final int RELATION_ADD = 1;
     public static final int RELATION_UPDATE = 2;
     public static final int RELATION_DELETE = 3;

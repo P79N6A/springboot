@@ -2,22 +2,24 @@ package com.example.demo.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.example.demo.common.Initialization;
+import com.example.demo.common.RequestUtil;
+import com.example.demo.common.ResultBean;
+import com.example.demo.common.zcy.Config;
 import com.example.demo.dao.AccountRespository;
 import com.example.demo.dao.MenuRespository;
-import com.example.demo.dao.UserRespository;
 import com.example.demo.model.Account;
 import com.example.demo.model.Menu;
-import com.example.demo.model.User;
+import com.example.demo.model.purchase.response.UserAuthResponse;
 import com.example.demo.service.AccountService;
-import com.example.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -94,6 +96,8 @@ public class AccountServiceImpl implements AccountService {
 //                this_.setNick_name(account.getNick_name());
 //                this_.setMeeting(1);
 //                this_.setSortLot(account.getSortLot());
+//                this_.setRealName(account.getRealName());
+//                this_.setAccount(account.getAccount());
                 accountRespository.save(this_);
                 return true;
             }
@@ -113,12 +117,32 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<Account> getLockSequence(int lock,int meeting) {
+        return accountRespository.findByLockAndMeeting(lock,meeting,new Sort(new Sort.Order(Sort.Direction.ASC,"sortLot")));
+    }
+
+    @Override
     public boolean updateSequence(String id,int review) {
         if(StringUtils.isNotBlank(id)){
             boolean exists=accountRespository.exists(id);
             if(exists){
                 Account account=accountRespository.findOne(id);
                 account.setReview(review);
+                accountRespository.save(account);
+                return true;
+            }
+            return  false;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateLock(String id, int lock) {
+        if(StringUtils.isNotBlank(id)){
+            boolean exists=accountRespository.exists(id);
+            if(exists){
+                Account account=accountRespository.findOne(id);
+                account.setLock(lock);
                 accountRespository.save(account);
                 return true;
             }
@@ -158,6 +182,60 @@ public class AccountServiceImpl implements AccountService {
             return  false;
         }
         return false;
+    }
+
+    @Override
+    public ResultBean authLogin(String userName, String password) {
+        if (StringUtils.isNotBlank(userName)&&StringUtils.isNotBlank(password)){
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("userName",userName.trim());
+            jsonObject.put("psw",password.trim());
+            log.info("login info:"+jsonObject.toString());
+            String userResp=RequestUtil.authRequest(jsonObject.toString(),Config.USER_AUTH_LOGIN);
+            log.info("login resp:"+userResp);
+            if(RequestUtil.isSuccess(userResp)){
+                UserAuthResponse userAuthResponse=JSON.parseObject(RequestUtil.getPosition(userResp),UserAuthResponse.class);
+                if (userAuthResponse.isSuccess()){
+                    String account=userAuthResponse.getData().getUserInfo().getUserName();
+                    String realName=userAuthResponse.getData().getUserInfo().getRealName();
+                    Account accountExits=accountRespository.findByAccountAndRealNameAndStatus(account,realName,Initialization.ACCOUNT_STATUS);
+                    if(accountExits!=null){
+                        //临时绑定旧数据
+//                        accountExits.setGmt_modify(Initialization.formatTime());
+//                        accountExits.setAvatar(userAuthResponse.getData().getUserInfo().getAvatar());
+//                        accountExits.setEmployeeId(userAuthResponse.getData().getUserInfo().getEmployeeId());
+//                        accountExits.setMail(userAuthResponse.getData().getUserInfo().getMail());
+//                        accountExits.setDepartment(userAuthResponse.getData().getUserInfo().getDepartments().get(0).getPath());
+//                        accountRespository.save(accountExits);
+                        return ResultBean.isSuccess(accountRespository.findOne(accountExits.getId()));
+                    }else{
+                        Account createAccount=new Account();
+                        createAccount.setGmt_create(Initialization.formatTime());
+                        createAccount.setStatus(Initialization.ACCOUNT_STATUS);
+                        createAccount.setStatus_name(allotStatus(Initialization.ACCOUNT_STATUS));
+                        createAccount.setRole(3);
+                        createAccount.setRole_name(allotRole(3));
+                        createAccount.setRoleLot("1001");
+                        createAccount.setGroup("客满服务");
+                        createAccount.setAccount(account);
+                        createAccount.setPassword(password);
+                        createAccount.setRealName(realName);
+                        createAccount.setNick_name(userAuthResponse.getData().getUserInfo().getNickName());
+                        createAccount.setPhone(userAuthResponse.getData().getUserInfo().getMobile());
+                        createAccount.setAvatar(userAuthResponse.getData().getUserInfo().getAvatar());
+                        createAccount.setEmployeeId(userAuthResponse.getData().getUserInfo().getEmployeeId());
+                        createAccount.setMail(userAuthResponse.getData().getUserInfo().getMail());
+                        createAccount.setDepartment(userAuthResponse.getData().getUserInfo().getDepartments().get(0).getPath());
+                        accountRespository.save(createAccount);
+                        return ResultBean.isSuccess(accountRespository.findByAccountAndRealNameAndStatus(account,realName,Initialization.ACCOUNT_STATUS));
+                    }
+                }
+                return ResultBean.isFailure(userAuthResponse);
+            }else{
+                return ResultBean.isThrows(userResp);
+            }
+        }
+        return ResultBean.isFailure("name or password is null");
     }
 
 
